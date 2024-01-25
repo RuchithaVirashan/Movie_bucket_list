@@ -90,6 +90,7 @@ class _HomeScreenState extends State<WishListScreen> {
   }
 
   void checkIdsAndAddToShowList(List<String> ids) {
+    showList.clear();
     for (var movie in widget.movieList) {
       if (ids.contains(movie['id'].toString())) {
         showList.add(movie);
@@ -98,21 +99,20 @@ class _HomeScreenState extends State<WishListScreen> {
   }
 
   Future<void> removeIdToWishList(String id) async {
-    print('Removing ID: $id');
-
     final prefs = await SharedPreferences.getInstance();
+
     String idList = prefs.getString('idList') ?? '';
     idsToWL = idList.split(',');
 
-    if (!idsToWL.contains(id)) {
-      idsToWL.remove({',$id'});
-      print('Removed $id');
-    }
+    idsToWL.remove(id);
 
     idList = idsToWL.join(',');
-    print('Before update: $idList');
+    print('Removed $idList');
+
     await prefs.setString('idList', idList);
-    print('After update: ${prefs.getString('idList')}');
+    checkIdsAndAddToShowList(idsToWL);
+
+    setState(() {});
   }
 
   @override
@@ -258,7 +258,7 @@ class _HomeScreenState extends State<WishListScreen> {
                                           onPressedWish: () {
                                             showCupertinoDialog(
                                               context: context,
-                                              builder: (context) =>
+                                              builder: (dialogContext) =>
                                                   CupertinoAlertDialog(
                                                 title: const Text('Delete'),
                                                 content: Column(
@@ -286,6 +286,10 @@ class _HomeScreenState extends State<WishListScreen> {
                                                       setState(() {
                                                         isLoading = false;
                                                       });
+
+                                                      Navigator.of(
+                                                              dialogContext)
+                                                          .pop();
                                                     },
                                                     child: const Text('Delete'),
                                                   ),

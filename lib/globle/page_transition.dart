@@ -12,7 +12,7 @@ Route createRoute(Widget page, TransitionType transitionType) {
           begin = Offset(0.0, 1.0);
           break;
         case TransitionType.upToDown:
-          begin = Offset(1.0, 0.0);
+          begin = Offset(0.0, -1.0);
           break;
         case TransitionType.leftToRight:
           begin = Offset(-1.0, 0.0);

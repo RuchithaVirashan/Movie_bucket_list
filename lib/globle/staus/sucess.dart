@@ -7,7 +7,7 @@ Future<void> showSuccessDialog(
   BuildContext context,
   String content,
   String buttonT,
-  Future Function() param3,
+  void Function() param3,
 ) async {
   Size size = MediaQuery.of(context).size;
   double relativeWidth = size.width / Constants.referenceWidth;

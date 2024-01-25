@@ -20,6 +20,7 @@ import '../globle/staus/connection.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../globle/staus/sucess.dart';
 import 'wishlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -387,6 +388,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                             addIdToWishList(showList[index]
                                                     ['id']
                                                 .toString());
+                                            showSuccessDialog(
+                                              context,
+                                              'Successfully added to wishlist',
+                                              'Okay',
+                                              () => Navigator.of(context).pop(),
+                                            );
                                           },
                                         );
                                       },
