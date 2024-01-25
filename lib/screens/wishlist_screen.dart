@@ -11,6 +11,7 @@ import 'package:movie_bucket_list/apis/baseurl.dart';
 import 'package:movie_bucket_list/components/home/movie_card.dart';
 import 'package:movie_bucket_list/globle/staus/error.dart';
 import 'package:movie_bucket_list/screens/details_screen.dart';
+import '../components/common/backbutton.dart';
 import '../components/common/default_text.dart';
 import '../components/common/progess_bar.dart';
 import '../components/home/no_result_found_message.dart';
@@ -20,30 +21,30 @@ import '../globle/staus/connection.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'wishlist_screen.dart';
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class WishListScreen extends StatefulWidget {
+  final List movieList;
+  const WishListScreen({
+    super.key,
+    required this.movieList,
+  });
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<WishListScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  var isLoading = true;
+class _HomeScreenState extends State<WishListScreen> {
+  var isLoading = false;
   StreamSubscription<ConnectivityResult>? subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
   int initLevel = 0;
   bool showedDialog = false;
   List showList = [];
-  DateTime selectedDate = DateTime.now();
-  CountryCode selectedCountry = CountryCode.fromCode('LK');
 
   @override
   void initState() {
     super.initState();
-    fetchData('init');
+    getIdListFromSharedPreferences();
   }
 
   @override
@@ -81,45 +82,28 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> fetchData(String where) async {
-    Response response;
-    const String apiUrl = ApiConfig.baseUrl;
-
-    setState(() {
-      isLoading = true;
-      initLevel = 2;
-    });
-    try {
-      where == 'init'
-          ? response = await Dio().get(apiUrl)
-          : response = await Dio().get(
-              '$apiUrl?date=${selectedDate.toIso8601String().substring(0, 10)}&country=${selectedCountry.code}');
-
-      if (response.statusCode == 200) {
-        // ShowResponse showResponse = ShowResponse.fromJson(response.data);
-
-        setState(() {
-          showList = response.data;
-          log('responce ${showList.length}');
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-        showErrorDialog(context, e.toString());
-      });
-    }
-  }
-
-  Future<void> addIdToWishList(String id) async {
+  Future<void> getIdListFromSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     String idList = prefs.getString('idList') ?? '';
     List<String> idsToWL = idList.split(',');
+    setState(() {
+      isLoading = false;
+    });
+    log('ids $idsToWL');
+  }
+
+  Future<void> removeIdToWishList(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    String idList = prefs.getString('idList') ?? '';
+
+    List<String> idsToWL = idList.split(',');
+
     if (!idsToWL.contains(id)) {
-      idsToWL.add(id);
+      idsToWL.remove(id);
     }
+
     idList = idsToWL.join(',');
+
     await prefs.setString('idList', idList);
   }
 
@@ -188,6 +172,11 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           : CustomScrollView(
               slivers: [
+                SliverAppBar.medium(
+                  backgroundColor: Colors.white,
+                  expandedHeight: relativeHeight * 0,
+                  leading: const BackButtonWidget(),
+                ),
                 SliverList(
                   delegate: SliverChildListDelegate(
                     [
@@ -202,32 +191,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             const DefaultText(
                               colorR: Color(0xFF22242E),
-                              content: 'Find Your \nFavorite Movie',
+                              content: 'WishList',
                               fontSizeR: 36,
                               fontWeightR: FontWeight.w400,
                               textAlignR: TextAlign.start,
                             ),
-                            Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: IconButton(
-                                icon: flutter.Image.asset(
-                                  'assets/wishlist.png',
-                                  height: relativeHeight * 40,
-                                  width: relativeWidth * 40,
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    createRoute(
-                                        WishListScreen(
-                                          movieList: showList,
-                                        ),
-                                        TransitionType.upToDown),
-                                  );
-                                },
-                              ),
-                            ),
+                            // Card(
+                            //   shape: RoundedRectangleBorder(
+                            //     borderRadius: BorderRadius.circular(15.0),
+                            //   ),
+                            //   child: IconButton(
+                            //     icon: flutter.Image.asset(
+                            //       'assets/wishlist.png',
+                            //       height: relativeHeight * 40,
+                            //       width: relativeWidth * 40,
+                            //     ),
+                            //     onPressed: () {
+                            //       log('count ${selectedCountry.code}: ${selectedDate.toIso8601String().substring(0, 10)}');
+                            //     },
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -241,109 +224,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: EdgeInsets.only(
-                                top: relativeHeight * 10,
-                                left: relativeWidth * 20,
-                              ),
-                              child: GestureDetector(
-                                onTap: () {
-                                  showCupertinoDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return CupertinoAlertDialog(
-                                        title: const Text(
-                                            'Filter Date and Country'),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            ElevatedButton(
-                                              child: Text(selectedDate == null
-                                                  ? 'Select Date'
-                                                  : selectedDate
-                                                      .toLocal()
-                                                      .toString()
-                                                      .split(' ')[0]),
-                                              onPressed: () async {
-                                                final date =
-                                                    await showDatePicker(
-                                                  context: context,
-                                                  initialDate: DateTime.now(),
-                                                  firstDate: DateTime(2020),
-                                                  lastDate: DateTime(2030),
-                                                );
-                                                if (date != null) {
-                                                  setState(() {
-                                                    selectedDate = date;
-                                                  });
-                                                }
-                                              },
-                                            ),
-                                            CountryCodePicker(
-                                              onChanged: (country) {
-                                                setState(() {
-                                                  selectedCountry = country;
-                                                });
-                                              },
-                                              initialSelection:
-                                                  selectedCountry.code,
-                                              favorite: const ['LK', 'US'],
-                                              showCountryOnly: true,
-                                              showOnlyCountryWhenClosed: true,
-                                              alignLeft: false,
-                                            ),
-                                          ],
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            child: Text('Cancel'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          TextButton(
-                                            child: Text('OK'),
-                                            onPressed: () {
-                                              fetchData('filter');
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Container(
-                                  width: relativeWidth * 120,
-                                  height: relativeHeight * 40,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.black,
-                                        width: 1,
-                                      ),
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.circular(15)),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      const DefaultText(
-                                        colorR: Color(0xFF22242E),
-                                        content: 'Filter',
-                                        fontSizeR: 12,
-                                        fontWeightR: FontWeight.w400,
-                                        textAlignR: TextAlign.start,
-                                      ),
-                                      flutter.Image.asset(
-                                        'assets/filter.png',
-                                        height: relativeHeight * 20,
-                                        width: relativeWidth * 20,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
                             showList.isEmpty
                                 ? const NoResultFondMes()
                                 : Padding(
@@ -383,9 +263,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           index: index,
                                           movieDetails: showList,
                                           onPressedWish: () {
-                                            addIdToWishList(showList[index]
-                                                    ['id']
-                                                .toString());
+                                            removeIdToWishList(
+                                                showList[index]['id']);
                                           },
                                         );
                                       },

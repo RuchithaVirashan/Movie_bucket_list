@@ -11,7 +11,7 @@ class ButtonWidget extends StatelessWidget {
   final void Function()? onPressed;
 
   const ButtonWidget({
-    Key? key, // Use 'Key?' instead of 'super.key'
+    Key? key,
     required this.buttonName,
     required this.bcolor,
     required this.tcolor,
@@ -32,11 +32,12 @@ class ButtonWidget extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(radius)),
           ),
         ),
-       minimumSize: MaterialStateProperty.all(Size(double.infinity, minHeight)),
+        minimumSize:
+            MaterialStateProperty.all(Size(double.infinity, minHeight)),
         padding: MaterialStateProperty.all(
           const EdgeInsets.symmetric(
-            horizontal: 20.0, // Adjust horizontal padding as needed
-            vertical: 8.0, // Adjust vertical padding as needed
+            horizontal: 20.0,
+            vertical: 8.0,
           ),
         ),
       ),

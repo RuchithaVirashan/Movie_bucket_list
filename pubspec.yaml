@@ -40,6 +40,9 @@ dependencies:
   percent_indicator: ^4.2.3
   connectivity_plus: ^5.0.2
   dio: ^5.4.0
+  html: ^0.15.4
+  country_code_picker: ^3.0.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
