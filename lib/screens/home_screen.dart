@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:developer';
+import 'package:flutter/widgets.dart' as flutter;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:movie_bucket_list/models/movie_model.dart';
 import '../components/common/default_text.dart';
 import '../components/common/progess_bar.dart';
 import '../globle/constants.dart';
 import '../globle/staus/connection.dart';
+import 'package:dio/dio.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +27,12 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isAlertSet = false;
   int initLevel = 0;
   bool showedDialog = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
 
   @override
   void didChangeDependencies() {
@@ -59,6 +69,33 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> fetchData() async {
+    Response response;
+    const String apiUrl = 'https://api.tvmaze.com/schedule/web';
+
+    setState(() {
+      // loadingStatus = "loading";
+    });
+    try {
+      response = await Dio().get(apiUrl);
+
+      if (response.statusCode == 200) {
+        ShowResponse showResponse = ShowResponse.fromJson(response.data);
+
+        log('responce ${showResponse.showList}');
+
+        setState(() {
+          // categoryList = categoryResponse.categoryList;
+          // loadingStatus = "";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        // loadingStatus = "error";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -92,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(100.0),
-                        child: const Image(
+                        child: flutter.Image(
                           image: AssetImage('assets/logo.jpeg'),
                         ),
                       ),
@@ -160,12 +197,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(15.0),
                               ),
                               child: IconButton(
-                                icon: Image.asset(
+                                icon: flutter.Image.asset(
                                   'assets/wishlist.png',
                                   height: relativeHeight * 40,
                                   width: relativeWidth * 40,
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  print('object');
+                                  fetchData();
+                                },
                               ),
                             ),
                           ],
@@ -208,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontWeightR: FontWeight.w400,
                                         textAlignR: TextAlign.start,
                                       ),
-                                      Image.asset(
+                                      flutter.Image.asset(
                                         'assets/filter.png',
                                         height: relativeHeight * 20,
                                         width: relativeWidth * 20,
