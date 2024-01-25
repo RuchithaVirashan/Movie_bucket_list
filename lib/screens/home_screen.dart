@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int initLevel = 0;
   bool showedDialog = false;
   List showList = [];
+  List showListFull = [];
   DateTime selectedDate = DateTime.now();
   CountryCode selectedCountry = CountryCode.fromCode('LK');
 
@@ -88,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       isLoading = true;
-      initLevel = 2;
+      initLevel = 1;
     });
     try {
       where == 'init'
@@ -100,7 +101,11 @@ class _HomeScreenState extends State<HomeScreen> {
         // ShowResponse showResponse = ShowResponse.fromJson(response.data);
 
         setState(() {
+          initLevel = 2;
           showList = response.data;
+          where == 'init'
+              ? showListFull = response.data
+              : showListFull = showListFull;
           log('responce ${showList.length}');
           isLoading = false;
         });
@@ -119,6 +124,19 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String> idsToWL = idList.split(',');
     if (!idsToWL.contains(id)) {
       idsToWL.add(id);
+      showSuccessDialog(
+        context,
+        'Successfully added to wishlist',
+        'Okay',
+        () => Navigator.of(context).pop(),
+      );
+    } else {
+      showSuccessDialog(
+        context,
+        'Alredy added',
+        'Okay',
+        () => Navigator.of(context).pop(),
+      );
     }
     idList = idsToWL.join(',');
     log('list $idList');
@@ -223,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Navigator.of(context).push(
                                     createRoute(
                                         WishListScreen(
-                                          movieList: showList,
+                                          movieList: showListFull,
                                         ),
                                         TransitionType.upToDown),
                                   );
@@ -388,12 +406,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                             addIdToWishList(showList[index]
                                                     ['id']
                                                 .toString());
-                                            showSuccessDialog(
-                                              context,
-                                              'Successfully added to wishlist',
-                                              'Okay',
-                                              () => Navigator.of(context).pop(),
-                                            );
                                           },
                                         );
                                       },

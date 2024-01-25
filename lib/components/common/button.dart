@@ -9,6 +9,8 @@ class ButtonWidget extends StatelessWidget {
   final double minHeight;
   final Color borderColor;
   final void Function()? onPressed;
+  final double spacing;
+  final double iconSize;
 
   const ButtonWidget({
     Key? key,
@@ -20,6 +22,8 @@ class ButtonWidget extends StatelessWidget {
     required this.minHeight,
     required this.borderColor,
     required this.onPressed,
+    this.iconSize = 24.0,
+    this.spacing = 8.0,
   });
 
   @override
@@ -50,10 +54,16 @@ class ButtonWidget extends StatelessWidget {
           Text(
             buttonName,
             style: TextStyle(
-              color: tcolor,
+              color: fcolor,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
+          ),
+          SizedBox(width: spacing), // Add spacing between text and icon
+          Icon(
+            Icons.favorite,
+            color: tcolor,
+            size: iconSize,
           ),
         ],
       ),

@@ -1,13 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:developer';
 import 'package:html/parser.dart' show parse;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:movie_bucket_list/components/common/button.dart';
+import 'package:movie_bucket_list/components/details/nameAndTime.dart';
 import 'package:movie_bucket_list/globle/staus/connection.dart';
-
+import 'package:movie_bucket_list/globle/staus/sucess.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../components/common/backbutton.dart';
-import '../components/common/default_text.dart';
 import '../globle/constants.dart';
 
 class DetailsScreen extends StatefulWidget {
@@ -63,8 +65,34 @@ class _DetailsScreenState extends State<DetailsScreen> {
     });
   }
 
+  Future<void> addIdToWishList(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    String idList = prefs.getString('idList') ?? '';
+    List<String> idsToWL = idList.split(',');
+    if (!idsToWL.contains(id)) {
+      idsToWL.add(id);
+      showSuccessDialog(
+        context,
+        'Successfully added to wishlist',
+        'Okay',
+        () => Navigator.of(context).pop(),
+      );
+    } else {
+      showSuccessDialog(
+        context,
+        'Alredy added',
+        'Okay',
+        () => Navigator.of(context).pop(),
+      );
+    }
+    idList = idsToWL.join(',');
+    log('list $idList');
+    await prefs.setString('idList', idList);
+  }
+
   dynamic converter() {
-    var document = parse(widget.selctedMovieDetails['_embedded']['show']['summary']);
+    var document =
+        parse(widget.selctedMovieDetails['_embedded']['show']['summary']);
     var text = document.body?.text;
     return text;
   }
@@ -108,34 +136,53 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
+                      padding: EdgeInsets.only(
+                        top: relativeHeight * 30,
+                        left: relativeWidth * 36,
+                        right: relativeWidth * 36,
+                      ),
+                      child: NameAndTimeWidget(
+                        name: widget.selctedMovieDetails['name'],
+                        summary: converter(),
+                        date: widget.selctedMovieDetails['airdate'],
+                        time: widget.selctedMovieDetails['_embedded']['show']
+                                    ['runtime'] !=
+                                null
+                            ? widget.selctedMovieDetails['_embedded']['show']
+                                    ['runtime']
+                                .toString()
+                            : '-- . --',
+                        rate: widget.selctedMovieDetails['_embedded']['show']
+                                    ['rating']['average'] !=
+                                null
+                            ? '${widget.selctedMovieDetails['_embedded']['show']['rating']['average'].toString()} / 10'
+                            : '-- / 10',
+                        genres: widget.selctedMovieDetails['_embedded']['show']
+                                    ['genres'] !=
+                                null
+                            ? widget.selctedMovieDetails['_embedded']['show']
+                                ['genres']
+                            : ['Not Specified'],
+                      )),
+                  Padding(
                     padding: EdgeInsets.only(
                       top: relativeHeight * 30,
-                      left: relativeWidth * 36,
+                      bottom: relativeHeight * 30,
+                      left: relativeWidth * 150,
                       right: relativeWidth * 36,
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DefaultText(
-                          // ignore: prefer_const_constructors
-                          colorR: const Color.fromRGBO(25, 30, 29, 1),
-                          content: widget.selctedMovieDetails['name'],
-                          fontSizeR: 24,
-                          fontWeightR: FontWeight.w600,
-                          textAlignR: TextAlign.start,
-                        ),
-                        SizedBox(
-                          height: relativeHeight * 10,
-                        ),
-                        DefaultText(
-                          colorR: const Color.fromRGBO(25, 30, 29, 1),
-                          content: converter(),
-                          fontSizeR: 16,
-                          fontWeightR: FontWeight.w400,
-                          textAlignR: TextAlign.start,
-                        ),
-                      ],
+                    child: ButtonWidget(
+                      onPressed: () async {
+                        addIdToWishList(
+                            widget.selctedMovieDetails['id'].toString());
+                      },
+                      buttonName: 'Add to WishList',
+                      tcolor: Colors.red,
+                      bcolor: Color(0xFF154478),
+                      borderColor: Colors.grey,
+                      radius: 8,
+                      fcolor: Colors.white,
+                      minHeight: relativeHeight * 60,
                     ),
                   ),
                 ],
@@ -144,21 +191,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
           ),
         ],
       ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // bottomNavigationBar: DefaultFloatingButton(
-      //   price: double.parse(state.currentPrice).toStringAsFixed(2),
-      //   onPressed: () {
-      //     if (mounted) {
-      //       StoreProvider.of<ApplicationState>(context).dispatch(
-      //         AssignEditOrNot(
-      //           isEdit: false,
-      //         ),
-      //       );
-      //       Navigator.pushNamed(context, '/addCart');
-      //     }
-      //   },
-      //   routeName: 'ADD CART',
-      // ),
     );
   }
 }
