@@ -1,24 +1,18 @@
 import 'dart:async';
 import 'dart:developer';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart' as flutter;
-import 'package:country_code_picker/country_code_picker.dart';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:movie_bucket_list/apis/baseurl.dart';
-import 'package:movie_bucket_list/components/home/movie_card.dart';
-import 'package:movie_bucket_list/globle/staus/error.dart';
+import 'package:movie_bucket_list/components/wishList/movie_card.dart';
+import 'package:movie_bucket_list/components/wishList/no_result_found_message.dart';
 import 'package:movie_bucket_list/screens/details_screen.dart';
 import '../components/common/backbutton.dart';
 import '../components/common/default_text.dart';
 import '../components/common/progess_bar.dart';
-import '../components/home/no_result_found_message.dart';
 import '../globle/constants.dart';
 import '../globle/page_transition.dart';
 import '../globle/staus/connection.dart';
-import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WishListScreen extends StatefulWidget {
@@ -33,13 +27,15 @@ class WishListScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<WishListScreen> {
-  var isLoading = false;
+  var isLoading = true;
   StreamSubscription<ConnectivityResult>? subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
   int initLevel = 0;
   bool showedDialog = false;
-  List showList = [];
+  List<dynamic> showList = [];
+
+  List<String> idsToWL = [];
 
   @override
   void initState() {
@@ -84,27 +80,39 @@ class _HomeScreenState extends State<WishListScreen> {
 
   Future<void> getIdListFromSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    String idList = prefs.getString('idList') ?? '';
-    List<String> idsToWL = idList.split(',');
     setState(() {
       isLoading = false;
     });
-    log('ids $idsToWL');
+    String idList = prefs.getString('idList') ?? '';
+    idsToWL = idList.split(',');
+
+    checkIdsAndAddToShowList(idsToWL);
+  }
+
+  void checkIdsAndAddToShowList(List<String> ids) {
+    for (var movie in widget.movieList) {
+      if (ids.contains(movie['id'].toString())) {
+        showList.add(movie);
+      }
+    }
   }
 
   Future<void> removeIdToWishList(String id) async {
+    print('Removing ID: $id');
+
     final prefs = await SharedPreferences.getInstance();
     String idList = prefs.getString('idList') ?? '';
-
-    List<String> idsToWL = idList.split(',');
+    idsToWL = idList.split(',');
 
     if (!idsToWL.contains(id)) {
-      idsToWL.remove(id);
+      idsToWL.remove({',$id'});
+      print('Removed $id');
     }
 
     idList = idsToWL.join(',');
-
+    print('Before update: $idList');
     await prefs.setString('idList', idList);
+    print('After update: ${prefs.getString('idList')}');
   }
 
   @override
@@ -140,7 +148,7 @@ class _HomeScreenState extends State<WishListScreen> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(100.0),
-                        child: flutter.Image(
+                        child: const Image(
                           image: AssetImage('assets/logo.jpeg'),
                         ),
                       ),
@@ -151,7 +159,7 @@ class _HomeScreenState extends State<WishListScreen> {
                         left: relativeWidth * 50.0,
                         right: relativeWidth * 50.0,
                       ),
-                      child: flutter.Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CommonProgressBar(
@@ -182,35 +190,20 @@ class _HomeScreenState extends State<WishListScreen> {
                     [
                       Padding(
                         padding: EdgeInsets.only(
-                          top: relativeHeight * 80,
+                          top: relativeHeight * 30,
                           left: relativeWidth * 30,
                           right: relativeWidth * 30,
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const DefaultText(
+                            DefaultText(
                               colorR: Color(0xFF22242E),
                               content: 'WishList',
                               fontSizeR: 36,
                               fontWeightR: FontWeight.w400,
                               textAlignR: TextAlign.start,
                             ),
-                            // Card(
-                            //   shape: RoundedRectangleBorder(
-                            //     borderRadius: BorderRadius.circular(15.0),
-                            //   ),
-                            //   child: IconButton(
-                            //     icon: flutter.Image.asset(
-                            //       'assets/wishlist.png',
-                            //       height: relativeHeight * 40,
-                            //       width: relativeWidth * 40,
-                            //     ),
-                            //     onPressed: () {
-                            //       log('count ${selectedCountry.code}: ${selectedDate.toIso8601String().substring(0, 10)}');
-                            //     },
-                            //   ),
-                            // ),
                           ],
                         ),
                       ),
@@ -225,7 +218,7 @@ class _HomeScreenState extends State<WishListScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             showList.isEmpty
-                                ? const NoResultFondMes()
+                                ? const NoResultFondMesWishList()
                                 : Padding(
                                     padding: EdgeInsets.symmetric(
                                       vertical: relativeHeight * 16,
@@ -249,7 +242,7 @@ class _HomeScreenState extends State<WishListScreen> {
                                               mainAxisSpacing:
                                                   relativeHeight * 10),
                                       itemBuilder: (context, index) {
-                                        return MovieCard(
+                                        return MovieCardWishList(
                                           onPressed: () {
                                             Navigator.of(context).push(
                                               createRoute(
@@ -263,8 +256,42 @@ class _HomeScreenState extends State<WishListScreen> {
                                           index: index,
                                           movieDetails: showList,
                                           onPressedWish: () {
-                                            removeIdToWishList(
-                                                showList[index]['id']);
+                                            showCupertinoDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  CupertinoAlertDialog(
+                                                title: const Text('Delete'),
+                                                content: Column(
+                                                  children: [
+                                                    Text('Are you sure!'),
+                                                  ],
+                                                ),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(context)
+                                                            .pop(),
+                                                    child: const Text('No'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () async {
+                                                      setState(() {
+                                                        isLoading = true;
+                                                      });
+
+                                                      await removeIdToWishList(
+                                                          showList[index]['id']
+                                                              .toString());
+
+                                                      setState(() {
+                                                        isLoading = false;
+                                                      });
+                                                    },
+                                                    child: const Text('Delete'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
                                           },
                                         );
                                       },

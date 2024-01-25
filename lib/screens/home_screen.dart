@@ -120,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
       idsToWL.add(id);
     }
     idList = idsToWL.join(',');
+    log('list $idList');
     await prefs.setString('idList', idList);
   }
 

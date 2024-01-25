@@ -15,18 +15,24 @@ class BackButtonWidget extends StatelessWidget {
       ),
       child: Container(
         height: relativeHeight * 100,
-          width: relativeWidth * 54,
+        width: relativeWidth * 54,
         decoration: BoxDecoration(
             color: Color(0x8D000000),
             shape: BoxShape.rectangle,
             borderRadius: BorderRadius.circular(15)),
         child: IconButton(
-          icon: SizedBox(
-            height: 16,
-            width: 16,
-            child: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Color(0xFFFFFFFF),
+          icon: Padding(
+            padding: EdgeInsets.only(
+              right: relativeWidth * 15,
+              bottom: relativeHeight * 10,
+            ),
+            child: const SizedBox(
+              height: 16,
+              width: 16,
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                color: Color(0xFFFFFFFF),
+              ),
             ),
           ),
           onPressed: () {
