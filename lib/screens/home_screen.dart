@@ -155,16 +155,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               fontWeightR: FontWeight.w400,
                               textAlignR: TextAlign.start,
                             ),
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: const Color(0x2D000000),
-                                  shape: BoxShape.rectangle,
-                                  borderRadius: BorderRadius.circular(15)),
+                            Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
                               child: IconButton(
                                 icon: Image.asset(
                                   'assets/wishlist.png',
-                                  height: relativeHeight * 25,
-                                  width: relativeWidth * 25,
+                                  height: relativeHeight * 40,
+                                  width: relativeWidth * 40,
                                 ),
                                 onPressed: () {},
                               ),
@@ -192,7 +191,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   width: relativeWidth * 120,
                                   height: relativeHeight * 40,
                                   decoration: BoxDecoration(
-                                      color: const Color(0x2D000000),
+                                      border: Border.all(
+                                        color: Colors.black,
+                                        width: 1,
+                                      ),
                                       shape: BoxShape.rectangle,
                                       borderRadius: BorderRadius.circular(15)),
                                   child: Row(
@@ -207,9 +209,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         textAlignR: TextAlign.start,
                                       ),
                                       Image.asset(
-                                        'assets/filter (1).png',
-                                        height: relativeHeight * 25,
-                                        width: relativeWidth * 25,
+                                        'assets/filter.png',
+                                        height: relativeHeight * 20,
+                                        width: relativeWidth * 20,
                                       ),
                                     ],
                                   ),
