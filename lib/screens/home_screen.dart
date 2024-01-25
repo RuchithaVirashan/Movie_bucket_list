@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart' as flutter;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:movie_bucket_list/components/home/movie_card.dart';
+import 'package:movie_bucket_list/globle/staus/error.dart';
 import 'package:movie_bucket_list/models/movie_model.dart';
 import '../components/common/default_text.dart';
 import '../components/common/progess_bar.dart';
@@ -27,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isAlertSet = false;
   int initLevel = 0;
   bool showedDialog = false;
+
+  List showList = [];
 
   @override
   void initState() {
@@ -74,24 +78,26 @@ class _HomeScreenState extends State<HomeScreen> {
     const String apiUrl = 'https://api.tvmaze.com/schedule/web';
 
     setState(() {
-      // loadingStatus = "loading";
+      isLoading = true;
+      initLevel = 1;
     });
     try {
       response = await Dio().get(apiUrl);
 
       if (response.statusCode == 200) {
-        ShowResponse showResponse = ShowResponse.fromJson(response.data);
-
-        log('responce ${showResponse.showList}');
+        // ShowResponse showResponse = ShowResponse.fromJson(response.data);
 
         setState(() {
-          // categoryList = categoryResponse.categoryList;
-          // loadingStatus = "";
+          initLevel = 2;
+          showList = response.data;
+          log('responce ${showList.length}');
+          isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        // loadingStatus = "error";
+        isLoading = false;
+        showErrorDialog(context, e.toString());
       });
     }
   }
@@ -137,17 +143,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     Padding(
                       padding: EdgeInsets.only(
                         top: relativeHeight * 20.0,
-                        left: relativeWidth * 120.0,
-                        right: relativeWidth * 120.0,
+                        left: relativeWidth * 50.0,
+                        right: relativeWidth * 50.0,
                       ),
-                      child: CommonProgressBar(
-                        percentage: initLevel == 0
-                            ? 0.0
-                            : initLevel == 1
-                                ? 0.4
-                                : initLevel == 2
-                                    ? 0.8
-                                    : 1,
+                      child: flutter.Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CommonProgressBar(
+                            percentage: initLevel == 0
+                                ? 0.0
+                                : initLevel == 1
+                                    ? 0.4
+                                    : initLevel == 2
+                                        ? 0.8
+                                        : 1,
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -275,6 +286,38 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: relativeHeight * 16,
+                                // horizontal: relativeWidth * 8,
+                              ),
+                              child: GridView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                itemCount: showList.length,
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio:
+                                      (relativeWidth * 100) /
+                                          (relativeHeight * 175),
+                                  // mainAxisExtent: relativeWidth * 400,
+                                ),
+                                itemBuilder: (context, index) {
+                                  print(' ${showList[0]['_embedded']['show']['image']['medium']}');
+                                  return MovieCard(
+                                    onPressed: () {
+                                      // clickCard(
+                                      //     showList[index],
+                                      //     state);
+                                    },
+                                    index: index,
+                                    movieDetails: showList,
+                                  );
+                                },
+                              ),
+                            )
                           ],
                         ),
                       ),

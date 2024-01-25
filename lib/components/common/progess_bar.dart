@@ -17,7 +17,7 @@ class CommonProgressBar extends StatelessWidget {
     double relativeWidth = size.width / Constants.referenceWidth;
     return Center(
       child: LinearPercentIndicator(
-        width: relativeWidth * 190,
+        width: relativeWidth * 150,
         animation: true,
         lineHeight: 10.0,
         animationDuration: 2000,

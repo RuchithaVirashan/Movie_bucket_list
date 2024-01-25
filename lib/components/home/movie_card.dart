@@ -35,39 +35,37 @@ class MovieCard extends StatelessWidget {
               vertical: relativeHeight * 8,
               horizontal: relativeWidth * 8,
             ),
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(14),
                   child: Image.network(
-                    movieDetails[index]['imgUrl'],
+                    movieDetails[index]['_embedded']['show']['image']['medium'],
                     fit: BoxFit.cover,
-                    width: relativeWidth * 186,
-                    height: relativeHeight * 214,
+                    // width: relativeWidth * 186,
+                    // height: relativeHeight * 214,
                   ),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(
-                      vertical: relativeHeight * 16,
-                      horizontal: relativeWidth * 16),
-                  child: SizedBox(
-                    width: relativeWidth * 170,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DefaultText(
-                          colorR: const Color.fromRGBO(25, 30, 29, 1),
-                          content: movieDetails[index]['name'],
-                          fontSizeR: 14,
-                          fontWeightR: FontWeight.w600,
-                          textAlignR: TextAlign.start,
-                        ),
-                        SizedBox(height: relativeHeight * 4),
-                      ],
-                    ),
+                    vertical: relativeHeight * 16,
+                    horizontal: relativeWidth * 16,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DefaultText(
+                        colorR: const Color.fromRGBO(25, 30, 29, 1),
+                        content: movieDetails[index]['name'].toString(),
+                        fontSizeR: 14,
+                        fontWeightR: FontWeight.w600,
+                        textAlignR: TextAlign.start,
+                      ),
+                      SizedBox(height: relativeHeight * 4),
+                    ],
                   ),
                 ),
               ],
