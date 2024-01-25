@@ -1,8 +1,8 @@
 import 'dart:io';
 
 class Constants {
-  static const referenceHeight = 932;
-  static const referenceWidth = 430;
+  static const referenceHeight = 812;
+  static const referenceWidth = 375;
   String currentPlatfrom = Platform.isAndroid
       ? "android"
       : Platform.isIOS

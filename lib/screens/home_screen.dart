@@ -71,10 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
               width: relativeWidth * 430,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: const AssetImage('assets/ammas logo.jpeg'),
+                  image: const AssetImage('assets/logo.jpeg'),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
-                    Colors.white.withOpacity(0.83),
+                    Colors.white.withOpacity(0.88),
                     BlendMode.srcOver,
                   ),
                 ),
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(100.0),
                         child: const Image(
-                          image: AssetImage('assets/ammas logo.jpeg'),
+                          image: AssetImage('assets/logo.jpeg'),
                         ),
                       ),
                     ),
@@ -141,16 +141,35 @@ class _HomeScreenState extends State<HomeScreen> {
                     [
                       Padding(
                         padding: EdgeInsets.only(
-                          top: relativeHeight * 60,
+                          top: relativeHeight * 80,
                           left: relativeWidth * 30,
-                          right: relativeWidth * 110,
+                          right: relativeWidth * 30,
                         ),
-                        child: DefaultText(
-                          colorR: Color(0xFF22242E),
-                          content: 'Find Your \nFavorite Movie',
-                          fontSizeR: 36,
-                          fontWeightR: FontWeight.w400,
-                          textAlignR: TextAlign.start,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const DefaultText(
+                              colorR: Color(0xFF22242E),
+                              content: 'Find Your \nFavorite Movie',
+                              fontSizeR: 36,
+                              fontWeightR: FontWeight.w400,
+                              textAlignR: TextAlign.start,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: const Color(0x2D000000),
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: BorderRadius.circular(15)),
+                              child: IconButton(
+                                icon: Image.asset(
+                                  'assets/wishlist.png',
+                                  height: relativeHeight * 25,
+                                  width: relativeWidth * 25,
+                                ),
+                                onPressed: () {},
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Padding(
@@ -166,6 +185,40 @@ class _HomeScreenState extends State<HomeScreen> {
                             Padding(
                               padding: EdgeInsets.only(
                                 top: relativeHeight * 10,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {},
+                                child: Container(
+                                  width: relativeWidth * 120,
+                                  height: relativeHeight * 40,
+                                  decoration: BoxDecoration(
+                                      color: const Color(0x2D000000),
+                                      shape: BoxShape.rectangle,
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      const DefaultText(
+                                        colorR: Color(0xFF22242E),
+                                        content: 'Filter',
+                                        fontSizeR: 12,
+                                        fontWeightR: FontWeight.w400,
+                                        textAlignR: TextAlign.start,
+                                      ),
+                                      Image.asset(
+                                        'assets/filter (1).png',
+                                        height: relativeHeight * 25,
+                                        width: relativeWidth * 25,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: relativeHeight * 20,
                                 left: relativeWidth * 36,
                                 right: relativeWidth * 36,
                               ),
